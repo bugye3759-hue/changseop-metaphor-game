@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description: "너 쌀숭이야? 드립력 테스트하고 명예의 전당 도전해라.",
     images: [
       {
-        url: "/og-image.png", // 카톡 공유할 때 뜰 이미지 (나중에 추가 가능)
+        url: "/og-image.jpg", // 카톡 공유할 때 뜰 이미지 (나중에 추가 가능)
         width: 800,
         height: 600,
       },
