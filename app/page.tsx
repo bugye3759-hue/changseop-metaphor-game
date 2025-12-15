@@ -259,7 +259,7 @@ export default function Home() {
                     ))
                   ) : (
                     <div className="text-center py-4 text-gray-600 text-sm bg-gray-900/50 rounded-lg">
-                      아직 레전드(90점+)가 없습니다.<br/>도전해서 박제되세요!
+                      아직 레전드(95점+)가 없습니다.<br/>도전해서 박제되세요!
                     </div>
                   )}
                 </div>
