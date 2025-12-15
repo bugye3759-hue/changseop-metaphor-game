@@ -18,7 +18,9 @@ const questions = [
   "게임 아이템 확률 조작하다 걸렸는데 '오류 수정'이라고 우기는 상황",
   "조별과제 하는데 자료조사만 하겠다는 놈이 자료를 나무위키 링크로 보낸 상황",
   "친구비 입금 안 했다고 단톡방 강퇴당하는 상황",
-  "소개팅 나갔는데 상대방이 주선자 욕만 1시간 하다가 집에 간 상황"
+  "소개팅 나갔는데 상대방이 주선자 욕만 1시간 하다가 집에 간 상황",
+  "게임 캐릭터 성능을 너프(하향)시키고 밸런스 패치라고 하는 상황",
+  "전 품목 50% 할인이라고 써 붙여 놓고, 전날 밤에 가격표를 3배로 올려버린 상황"
 ];
 
 export default function Home() {
@@ -30,7 +32,8 @@ export default function Home() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ score: number; comment: string } | null>(null);
-
+  
+  
   // 명예의 전당 데이터 (전체)
   const [allRanks, setAllRanks] = useState<Record<string, RecordType[]>>({});
 
@@ -96,6 +99,11 @@ export default function Home() {
     setQuestion(random);
     setResult(null);
     setInput('');
+  };
+  
+  const handleRetry = () => {
+    setResult(null); // 결과창 닫기 (문제는 그대로 유지됨)
+    setInput('');    // 입력창 비우기 (새로 쓰게)
   };
 
   return (
@@ -171,7 +179,15 @@ export default function Home() {
                 >
                   🏆 남들은 몇 점일까? (명예의 전당 가기)
                 </button>
+
+                <button 
+                  onClick={handleRetry}
+                  className="w-full mt-3 bg-gray-800 border-2 border-yellow-400 text-yellow-400 font-bold py-3 rounded-xl transition-all hover:bg-gray-700 active:scale-95 flex items-center justify-center gap-2"
+                >
+                  🔄 아쉬운가? 이 문제 재도전하기
+                </button>
               </div>
+
             ) : (
               /* 입력창 */
               <div className="mb-6">
