@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     console.log("✅ 점수 산출 완료:", jsonResult.score);
 
     // [입구컷 로직] 80점 이상일 때만 DB에 저장
-    if (jsonResult.score >= 10) {
+    if (jsonResult.score >= 90) {
       const { error } = await supabase
         .from('hall_of_fame')
         .insert([
@@ -81,9 +81,19 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("❌ 에러 발생:", error);
-    return NextResponse.json(
-      { score: 0, comment: `서버 오류: ${error.message}` }, 
-      { status: 500 }
-    );
+
+    // 1. 구글 서버 과부하 (503 Service Unavailable) 감지
+    if (error.message.includes("503") || error.message.includes("overloaded")) {
+      return NextResponse.json({
+        score: 0,
+        comment: "🇺🇸 Google: 'Server Overloaded...'\n\n🇰🇷 신창섭: \"감히 구글 따위가 내 '정상화' 속도를 버티지 못하다니...\n\n이 녀석들의 기술력이 부족해서 점수를 매길 수가 없다. 잠시 후 다시 시도해서 서버를 '정상화' 해라.\""
+      });
+    }
+
+    // 2. 그 외 일반적인 오류
+    return NextResponse.json({ 
+      score: 0, 
+      comment: "오류가 발생했다. 리선족들이 서버를 공격한 것 같다. 잠시 후 다시 시도해라." 
+    });
   }
 }
