@@ -55,23 +55,26 @@ export async function POST(request: Request) {
     const jsonResult = JSON.parse(text);
     console.log("✅ 점수 산출 완료:", jsonResult.score);
 
-    // 👇 [NEW] DB에 저장하는 코드 추가!
-    const { error } = await supabase
-      .from('hall_of_fame')
-      .insert([
-        {
-          situation: situation,
-          metaphor: metaphor,
-          score: jsonResult.score,
-          comment: jsonResult.comment
-        }
-      ]);
+    // [입구컷 로직] 80점 이상일 때만 DB에 저장
+    if (jsonResult.score >= 10) {
+      const { error } = await supabase
+        .from('hall_of_fame')
+        .insert([
+          {
+            situation: situation,
+            metaphor: metaphor,
+            score: jsonResult.score,
+            comment: jsonResult.comment
+          }
+        ]);
 
-    if (error) {
-      console.error("DB 저장 실패:", error);
-      // DB 저장은 실패해도 게임은 진행되게 에러는 무시함
+      if (error) {
+        console.error("DB 저장 에러:", error);
+      } else {
+        console.log("💾 명예의 전당 등록 완료!");
+      }
     } else {
-      console.log("💾 DB 저장 성공!");
+      console.log("🗑️ 점수 미달로 DB 저장 안 함 (입구컷)");
     }
 
     return NextResponse.json(jsonResult);
