@@ -1,19 +1,69 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { supabase } from '@/app/lib/supabase'; // 👈 DB 연결 도구 가져오기
+import { supabase } from '@/app/lib/supabase';
+
+// [접속자 카운트 장부]
+const rateLimitMap = new Map(); 
+
+// 1명당 최대 허용 횟수
+const MAX_REQUESTS = 100; 
+
+// 제한 시간 (24시간)
+const TIME_WINDOW = 24 * 60 * 60 * 1000;
+
+// [IP 체크 함수]
+function checkRateLimit(ip: string) {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  // 1. 처음 온 사람
+  if (!record) {
+    rateLimitMap.set(ip, { count: 1, startTime: now });
+    return true;
+  }
+
+  // 2. 시간 경과 (초기화)
+  if (now - record.startTime > TIME_WINDOW) {
+    rateLimitMap.set(ip, { count: 1, startTime: now });
+    return true;
+  }
+
+  // 3. 횟수 초과 차단
+  if (record.count >= MAX_REQUESTS) {
+    return false;
+  }
+
+  // 4. 카운트 증가
+  record.count += 1;
+  return true;
+}
 
 export async function POST(request: Request) {
   try {
+    // 1. IP 확인 및 디도스 방지 (request 변수명 통일됨)
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json({
+        score: 0,
+        comment: "🚫 [경고] 하루 이용 횟수(100회)를 초과했다.\n\n신창섭: \"적당히 좀 해라 쌀숭아... 내 돈 나간다. 내일 다시 와라.\""
+      }, { status: 429 });
+    }
+  
+    // 2. API 키 확인
     const apiKey = process.env.GOOGLE_API_KEY;
     if (!apiKey) throw new Error("API 키가 없습니다.");
 
+    // 3. 모델 설정 (요청하신 2.0 버전 적용)
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
+    // 4. 요청 데이터 파싱
     const { situation, metaphor } = await request.json();
 
     console.log(`[요청] 상황: ${situation}`);
 
+    // [프롬프트: 원본 유지]
     const prompt = `
       [페르소나 정의]
       너는 메이플스토리의 디렉터 '신창섭(김창섭)'이다.
@@ -48,6 +98,7 @@ export async function POST(request: Request) {
       }
     `;
 
+    // 5. AI 응답 생성
     const result = await model.generateContent(prompt);
     const response = await result.response;
     let text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
@@ -55,7 +106,7 @@ export async function POST(request: Request) {
     const jsonResult = JSON.parse(text);
     console.log("✅ 점수 산출 완료:", jsonResult.score);
 
-    // [입구컷 로직] 80점 이상일 때만 DB에 저장
+    // 6. DB 저장 로직 (90점 이상만)
     if (jsonResult.score >= 90) {
       const { error } = await supabase
         .from('hall_of_fame')
@@ -82,11 +133,14 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("❌ 에러 발생:", error);
 
-    // 1. 구글 서버 과부하 (503 Service Unavailable) 감지
-    if (error.message.includes("503") || error.message.includes("overloaded")) {
+    // 에러 메시지 처리
+    const errorMsg = error.message || JSON.stringify(error);
+
+    // 1. 구글 서버 과부하 (503) 또는 사용량 초과 (429) 감지
+    if (errorMsg.includes("503") || errorMsg.includes("overloaded") || errorMsg.includes("429") || errorMsg.includes("Quota")) {
       return NextResponse.json({
         score: 0,
-        comment: "🇺🇸 Google: 'Server Overloaded...'\n\n🇰🇷 신창섭: \"감히 구글 따위가 내 '정상화' 속도를 버티지 못하다니...\n\n이 녀석들의 기술력이 부족해서 점수를 매길 수가 없다. 잠시 후 다시 시도해서 서버를 '정상화' 해라.\""
+        comment: "🇺🇸 Google: 'Server Overloaded (Quota Exceeded)'\n\n🇰🇷 신창섭: \"쌀숭이들이 떼거지로 몰려왔구나...\n\n접속자가 너무 많아서 무료 서버가 터졌다. 1분만 기다렸다가 다시 시도해라. 그게 '정상화'니까.\""
       });
     }
 
