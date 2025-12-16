@@ -287,7 +287,7 @@ export default function Home() {
                   onClick={() => setActiveTab('rank')}
                   className="w-full mt-6 bg-black text-yellow-400 font-bold py-3 rounded-xl hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 shadow-lg"
                 >
-                  🏆 남들은 몇 점일까? (명예의 전당 가기)
+                  🏆 이 상황 95점 이상 비유보기
                 </button>
 
                 <button 
