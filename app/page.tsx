@@ -118,6 +118,18 @@ export default function Home() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ score: number; comment: string } | null>(null);
+
+  const [copied, setCopied] = useState(false);
+
+  // 2. 본인 계좌번호 (여기를 수정하세요!)
+  const ACCOUNT_NUMBER = "토스뱅크 1908-8697-9909 안*회"; 
+
+  // 3. 복사 기능 함수
+  const handleCopyAccount = () => {
+    navigator.clipboard.writeText(ACCOUNT_NUMBER); // 클립보드에 복사
+    setCopied(true); // "복사됨!" 상태로 변경
+    setTimeout(() => setCopied(false), 2000); // 2초 뒤에 다시 원래대로 복구
+  };
   
   
   // 명예의 전당 데이터 (전체)
@@ -377,6 +389,40 @@ export default function Home() {
                 </button>
               </div>
             ))}
+
+            <div className="mt-12 mb-6 p-6 bg-blue-950/50 rounded-2xl border border-blue-500/30 text-center relative overflow-hidden group">
+              
+              {/* 배경 장식 (은은한 광원) */}
+              <div className="absolute top-0 left-0 w-full h-full bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors pointer-events-none"></div>
+
+              <h3 className="text-blue-300 font-bold text-lg mb-2 relative z-10">
+                💰 서버비 납부 고지서
+              </h3>
+              <p className="text-gray-400 text-sm mb-5 break-keep relative z-10">
+                "재밌게 즐겼나? 세상에 공짜는 없다.<br/>
+                <span className="text-blue-200 font-bold">서버비 정상화</span>에 동참해라."
+              </p>
+              
+              <button 
+                onClick={handleCopyAccount}
+                className={`relative z-10 w-full md:w-auto inline-flex items-center justify-center gap-2 font-bold py-4 px-8 rounded-xl transition-all shadow-lg active:scale-95 border
+                  ${copied 
+                    ? 'bg-green-600 border-green-400 text-white shadow-[0_0_20px_rgba(34,197,94,0.4)] scale-105' 
+                    : 'bg-[#3182F6] hover:bg-[#1b64da] border-blue-400 text-white shadow-[0_0_15px_rgba(49,130,246,0.3)]'
+                  }`}
+              >
+                <span className="text-xl">
+                  {copied ? '✅' : '💸'}
+                </span>
+                <span>
+                  {copied ? '계좌번호가 복사되었다! (정상화 완료)' : '계좌번호 복사하고 돈 보내기'}
+                </span>
+              </button>
+              
+              <p className="text-xs text-gray-500 mt-3 relative z-10">
+                * 누르면 계좌번호가 복사됩니다. (토스뱅크)
+              </p>
+            </div>
             
             <div className="h-10 text-center text-gray-600 text-xs">
               모든 데이터는 실시간으로 '정상화' 됩니다.
