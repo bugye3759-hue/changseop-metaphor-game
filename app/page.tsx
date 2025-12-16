@@ -163,10 +163,23 @@ export default function Home() {
             {/* 결과창 */}
             {result ? (
               <div className="bg-white text-black p-6 rounded-2xl mb-6 shadow-[0_0_30px_rgba(255,255,0,0.3)] border-4 border-yellow-400 animate-pop-in">
+                
+                {/* 👇 [수정됨] 내가 쓴 답안 (검은 바탕 + 흰 글씨) */}
+                <div className="mb-6 bg-gray-900 p-5 rounded-xl border-l-4 border-yellow-400 text-left shadow-inner">
+                  <p className="text-xs text-yellow-500 font-bold mb-2 tracking-wider">
+                    📄 내가 제출한 답안
+                  </p>
+                  <p className="text-white font-medium text-lg whitespace-pre-wrap break-keep leading-relaxed">
+                    "{input}"
+                  </p>
+                </div>
+                {/* 👆 여기까지 수정됨 */}
+
                 <div className="text-center">
                   <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Score</p>
                   <span className="text-8xl font-black text-red-600 leading-none">{result.score}</span>
                 </div>
+
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <p className="text-lg font-bold text-gray-800 italic break-keep">
                     "{result.comment}"
