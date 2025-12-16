@@ -122,7 +122,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
 
   // 2. 본인 계좌번호 (여기를 수정하세요!)
-  const ACCOUNT_NUMBER = "토스뱅크 1908-8697-9909 안*회"; 
+  const ACCOUNT_NUMBER = "토스뱅크 1908-8697-9909 "; 
 
   // 3. 복사 기능 함수
   const handleCopyAccount = () => {
